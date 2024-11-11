@@ -11,6 +11,7 @@
     <PackageReadmeFile>README</PackageReadmeFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Version>1.0.1</Version>
+    <RepositoryUrl>https://github.com/bigtyre/RabbitMqConnectionHelper</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
