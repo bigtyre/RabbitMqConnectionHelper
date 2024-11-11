@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>BigTyre.RabbitMq</RootNamespace>
+    <Product>BigTyre.RabbitMq</Product>
+    <Company>Big Tyre Pty Ltd</Company>
+    <Authors>BigTyre.RabbitMq</Authors>
+    <Title>RabbitMQ client helpers</Title>
+    <Description>Provides some helper classes that make working with RabbitMQ connections easier.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>
