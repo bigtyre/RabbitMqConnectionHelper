@@ -8,7 +8,7 @@
     <Authors>BigTyre.RabbitMq</Authors>
     <Title>RabbitMQ client helpers</Title>
     <Description>Provides some helper classes that make working with RabbitMQ connections easier.</Description>
-    <PackageReadmeFile>README</PackageReadmeFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Version>1.0.1</Version>
     <RepositoryUrl>https://github.com/bigtyre/RabbitMqConnectionHelper</RepositoryUrl>
@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="README">
+    <None Update="README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
