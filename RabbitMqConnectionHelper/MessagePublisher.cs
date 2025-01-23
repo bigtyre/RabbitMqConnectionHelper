@@ -9,17 +9,26 @@ namespace BigTyre.RabbitMq
 {
     public class MessagePublisher : IMessagePublisher, IDisposable
     {
-        private bool disposedValue;
+        private bool _isDisposed;
         private Task<IModel> _channelTask;
-        protected const string ExchangeName = "default";
 
         protected IModel Channel { get; private set; }
 
+        private readonly string _exchangeName;
+        private readonly TimeSpan _channelSetupTimeout;
         private readonly RabbitMqConnectionProvider _connectionProvider;
         private readonly ILogger<MessagePublisher> _logger;
 
-        public MessagePublisher(RabbitMqConnectionProvider connectionProvider, ILogger<MessagePublisher> logger)
+        public MessagePublisher(
+            RabbitMqConnectionProvider connectionProvider, 
+            ILogger<MessagePublisher> logger,
+            MessagePublisherSettings settings = null
+        )
         {
+            var config = settings ?? new MessagePublisherSettings();
+            _channelSetupTimeout = config.ChannelSetupTimeout;
+            _exchangeName = config.ExchangeName;
+
             if (connectionProvider is null) throw new ArgumentNullException(nameof(connectionProvider));
             _connectionProvider = connectionProvider;
             _logger = logger;
@@ -40,14 +49,14 @@ namespace BigTyre.RabbitMq
 
             try
             {
-                _logger.LogDebug($"Publishing JSON message of type {type} to topic {topic} on exchange {ExchangeName}");
+                _logger.LogDebug($"Publishing JSON message of type {type} to topic {topic} on exchange {_exchangeName}");
 
                 props.Type = type;
 
                 lock (channel)
                 {
                     channel.BasicPublish(
-                        ExchangeName,
+                        _exchangeName,
                         topic,
                         props,
                         body: content
@@ -55,7 +64,7 @@ namespace BigTyre.RabbitMq
                 }
 
 
-                _logger.LogDebug($"Successfully published JSON message of type {type} to topic {topic} on exchange {ExchangeName}.");
+                _logger.LogDebug($"Successfully published JSON message of type {type} to topic {topic} on exchange {_exchangeName}.");
             }
             catch (Exception ex)
             {
@@ -115,19 +124,17 @@ namespace BigTyre.RabbitMq
 
                 var channelTask = _connectionProvider.CreateChannelAsync();
 
-                var connectionTimeout = TimeSpan.FromSeconds(10);
-
-                var timeoutTask = Task.Delay(connectionTimeout);
+                var timeoutTask = Task.Delay(_channelSetupTimeout);
 
                 await Task.WhenAny(timeoutTask, channelTask);
 
                 if (channelTask.IsCompleted is false && timeoutTask.IsCompleted)
                 {
-                    throw new TimeoutException($"Timed out while waiting for RabbitMQ channel to be established. Timeout duration was {connectionTimeout.TotalSeconds} sec.");
+                    throw new TimeoutException($"Timed out while waiting for RabbitMQ channel to be established. Timeout duration was {_channelSetupTimeout.TotalSeconds} sec.");
                 }
 
                 var channel = await channelTask;
-                channel.ExchangeDeclarePassive(ExchangeName);
+                channel.ExchangeDeclarePassive(_exchangeName);
 
                 if (channel is null)
                 {
@@ -154,26 +161,27 @@ namespace BigTyre.RabbitMq
             }
         }
 
-        protected virtual void Dispose(bool disposing)
+        protected virtual void Dispose(bool isDisposing)
         {
-            if (!disposedValue)
+            if (_isDisposed)
+                return;
+            
+            if (isDisposing)
             {
-                if (disposing)
+                lock (ChannelLock)
                 {
-                    lock (ChannelLock)
-                    {
-                        if (Channel?.IsOpen == true) Channel?.Close();
-                        Channel?.Dispose();
-                    }
+                    if (Channel?.IsOpen == true) Channel?.Close();
+                    Channel?.Dispose();
                 }
-
-                disposedValue = true;
             }
+
+            _isDisposed = true;
         }
+
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
+            Dispose(isDisposing: true);
             GC.SuppressFinalize(this);
         }
     }

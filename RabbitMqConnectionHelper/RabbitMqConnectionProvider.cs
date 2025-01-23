@@ -40,8 +40,9 @@ namespace BigTyre.RabbitMq
 
             var uid = Guid.NewGuid();
 
-            var model = connection.CreateModel();
+            _logger.LogTrace("Got RabbitMQ connection. Starting channel.");
 
+            var model = connection.CreateModel();
             if (model is null)
             {
                 _logger.LogWarning("Create Channel returned a null value.");
